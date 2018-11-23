@@ -15,6 +15,8 @@ public class AuctionHouseImp implements AuctionHouse {
 
     private static Logger logger = Logger.getLogger("auctionhouse");
     private static final String LS = System.lineSeparator();
+    private ArrayList registeredBuyers;
+    private ArrayList registeredSellers;
     
     private String startBanner(String messageName) {
         return  LS 
