@@ -36,7 +36,7 @@ public class AuctionHouseImp implements AuctionHouse {
             String bankAccount,
             String bankAuthCode) {
         logger.fine(startBanner("registerBuyer " + name));
-        
+        //add check for null strings
         Buyer newBuyer = new Buyer(name, address, bankAccount, bankAuthCode);
         registeredBuyers.add(newBuyer);
         
@@ -48,6 +48,9 @@ public class AuctionHouseImp implements AuctionHouse {
             String address,
             String bankAccount) {
         logger.fine(startBanner("registerSeller " + name));
+        //add check for null strings
+        Seller newSeller = new Seller(name, address, bankAccount);
+        registeredSellers.add(newSeller);
         
         return Status.OK();      
     }
@@ -68,7 +71,6 @@ public class AuctionHouseImp implements AuctionHouse {
         List<CatalogueEntry> catalogue = new ArrayList<CatalogueEntry>();
         logger.fine("Catalogue: " + catalogue.toString());
         return catalogue;
-        //hello
     }
 
     public Status noteInterest(
