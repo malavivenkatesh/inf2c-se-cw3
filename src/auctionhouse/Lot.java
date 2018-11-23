@@ -1,16 +1,22 @@
 package auctionhouse;
 
-public class Lot {
+import java.util.HashMap;
+
+public class Lot extends CatalogueEntry {
     
     private Seller lotSeller;
-    private int lotID;
-    private String description;
     private Money reservePrice;
+    private HashMap<String, Buyer> interestedBuyers = new HashMap<>();
     
-    public Lot(String sellerName, int number, String description, Money reservePrice) {
-        lotID = number;
-        this.description = description;
+    public Lot(Seller lotSeller, int number, String description, Money reservePrice) {
+
+        super(number, description, LotStatus.UNSOLD);
         this.reservePrice = reservePrice;
-        
+        this.lotSeller = lotSeller;
+    }
+    
+    public Status noteInterest(String buyerName, Buyer intBuyer){
+        interestedBuyers.put(buyerName, intBuyer);
+        return Status.OK();
     }
 }

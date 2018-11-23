@@ -4,6 +4,7 @@
 package auctionhouse;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -15,8 +16,10 @@ public class AuctionHouseImp implements AuctionHouse {
 
     private static Logger logger = Logger.getLogger("auctionhouse");
     private static final String LS = System.lineSeparator();
-    private ArrayList<Buyer> registeredBuyers;
-    private ArrayList<Seller> registeredSellers;
+    
+    private HashMap<String, Buyer> registeredBuyers;
+    private HashMap<String, Seller> registeredSellers;
+    private HashMap<Integer, Lot> allLots;
     
     private String startBanner(String messageName) {
         return  LS 
@@ -26,8 +29,9 @@ public class AuctionHouseImp implements AuctionHouse {
     }
    
     public AuctionHouseImp(Parameters parameters) {
-        ArrayList<Buyer> registeredBuyers = new ArrayList<>();
-        ArrayList<Seller> registeredSellers = new ArrayList<>();
+        registeredBuyers = new HashMap<>();
+        registeredSellers = new HashMap<>();
+        allLots = new HashMap<>();
     }
 
     public Status registerBuyer(
@@ -38,7 +42,7 @@ public class AuctionHouseImp implements AuctionHouse {
         logger.fine(startBanner("registerBuyer " + name));
         //add check for null strings
         Buyer newBuyer = new Buyer(name, address, bankAccount, bankAuthCode);
-        registeredBuyers.add(newBuyer);
+        registeredBuyers.put(name, newBuyer);
         
         return Status.OK();
     }
@@ -49,8 +53,11 @@ public class AuctionHouseImp implements AuctionHouse {
             String bankAccount) {
         logger.fine(startBanner("registerSeller " + name));
         //add check for null strings
+        if(registeredSellers.get(name) != null) {
+            return Status.error("Seller already registered.");
+        }
         Seller newSeller = new Seller(name, address, bankAccount);
-        registeredSellers.add(newSeller);
+        registeredSellers.put(name, newSeller);
         
         return Status.OK();      
     }
@@ -61,6 +68,9 @@ public class AuctionHouseImp implements AuctionHouse {
             String description,
             Money reservePrice) {
         logger.fine(startBanner("addLot " + sellerName + " " + number));
+        Seller lotSeller = registeredSellers.get(sellerName);
+        Lot newLot = new Lot(lotSeller, number, description, reservePrice);
+        allLots.put(number, newLot);
         
         return Status.OK();    
     }
@@ -77,6 +87,9 @@ public class AuctionHouseImp implements AuctionHouse {
             String buyerName,
             int lotNumber) {
         logger.fine(startBanner("noteInterest " + buyerName + " " + lotNumber));
+        Buyer intBuyer = registeredBuyers.get(buyerName);
+        Lot intLot = allLots.get(lotNumber);
+        intLot.noteInterest(buyerName, intBuyer);
         
         return Status.OK();   
     }
