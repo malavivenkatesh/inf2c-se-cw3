@@ -64,6 +64,7 @@ public class AuctionHouseImp implements AuctionHouse {
         List<CatalogueEntry> catalogue = new ArrayList<CatalogueEntry>();
         logger.fine("Catalogue: " + catalogue.toString());
         return catalogue;
+        //hello
     }
 
     public Status noteInterest(
