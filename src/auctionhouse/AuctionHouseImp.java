@@ -15,8 +15,8 @@ public class AuctionHouseImp implements AuctionHouse {
 
     private static Logger logger = Logger.getLogger("auctionhouse");
     private static final String LS = System.lineSeparator();
-    private ArrayList registeredBuyers;
-    private ArrayList registeredSellers;
+    private ArrayList<Buyer> registeredBuyers;
+    private ArrayList<Seller> registeredSellers;
     
     private String startBanner(String messageName) {
         return  LS 
@@ -26,7 +26,8 @@ public class AuctionHouseImp implements AuctionHouse {
     }
    
     public AuctionHouseImp(Parameters parameters) {
-
+        ArrayList<Buyer> registeredBuyers = new ArrayList<>();
+        ArrayList<Seller> registeredSellers = new ArrayList<>();
     }
 
     public Status registerBuyer(
@@ -35,6 +36,9 @@ public class AuctionHouseImp implements AuctionHouse {
             String bankAccount,
             String bankAuthCode) {
         logger.fine(startBanner("registerBuyer " + name));
+        
+        Buyer newBuyer = new Buyer(name, address, bankAccount, bankAuthCode);
+        registeredBuyers.add(newBuyer);
         
         return Status.OK();
     }
