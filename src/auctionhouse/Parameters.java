@@ -13,6 +13,7 @@ public class Parameters {
     public final MessagingService messagingService;
     public final BankingService bankingService;
     
+    //use global messaging and banking service
     public Parameters(
             double buyerPremium,
             double commission,

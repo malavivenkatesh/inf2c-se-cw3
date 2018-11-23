@@ -19,9 +19,8 @@ public class Seller {
         return address;
     }
     
-//    public Seller getSeller(String sellerName) {
-//        return 
-//       
-//    }
-//    
+    public String getBankAccount() {
+        return bankAccount;
+    }
+    
 }

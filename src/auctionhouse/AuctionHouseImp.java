@@ -4,8 +4,10 @@
 package auctionhouse;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -40,7 +42,14 @@ public class AuctionHouseImp implements AuctionHouse {
             String bankAccount,
             String bankAuthCode) {
         logger.fine(startBanner("registerBuyer " + name));
-        //add check for null strings
+        
+//        if (name.equals(null) || address.equals(null) || bankAccount.equals(null)) {
+//            return Status.error("Input empty");
+//        }
+        if (registeredBuyers.get(name) != null) {
+            return Status.error("Buyer already registered");
+        }
+        
         Buyer newBuyer = new Buyer(name, address, bankAccount, bankAuthCode);
         registeredBuyers.put(name, newBuyer);
         
@@ -52,10 +61,11 @@ public class AuctionHouseImp implements AuctionHouse {
             String address,
             String bankAccount) {
         logger.fine(startBanner("registerSeller " + name));
-        //add check for null strings
+        
         if(registeredSellers.get(name) != null) {
             return Status.error("Seller already registered.");
         }
+        
         Seller newSeller = new Seller(name, address, bankAccount);
         registeredSellers.put(name, newSeller);
         
@@ -68,6 +78,11 @@ public class AuctionHouseImp implements AuctionHouse {
             String description,
             Money reservePrice) {
         logger.fine(startBanner("addLot " + sellerName + " " + number));
+        
+        if (allLots.get(number) != null) {
+            return Status.error("Lot ID already in use");
+        }
+        
         Seller lotSeller = registeredSellers.get(sellerName);
         Lot newLot = new Lot(lotSeller, number, description, reservePrice);
         allLots.put(number, newLot);
@@ -80,6 +95,15 @@ public class AuctionHouseImp implements AuctionHouse {
         
         List<CatalogueEntry> catalogue = new ArrayList<CatalogueEntry>();
         logger.fine("Catalogue: " + catalogue.toString());
+        
+        Set<Integer> lotNumberList = allLots.keySet();
+        ArrayList<Integer> lotNumberListSorted = new ArrayList<>(lotNumberList);
+        Collections.sort(lotNumberListSorted);
+        
+        for(Integer i : lotNumberListSorted) {
+            catalogue.add(allLots.get(i));
+        }
+        
         return catalogue;
     }
 
@@ -87,7 +111,13 @@ public class AuctionHouseImp implements AuctionHouse {
             String buyerName,
             int lotNumber) {
         logger.fine(startBanner("noteInterest " + buyerName + " " + lotNumber));
+        
         Buyer intBuyer = registeredBuyers.get(buyerName);
+        
+        if (intBuyer == null) {
+            return Status.error("User not registered as buyer");
+        }
+        
         Lot intLot = allLots.get(lotNumber);
         intLot.noteInterest(buyerName, intBuyer);
         
