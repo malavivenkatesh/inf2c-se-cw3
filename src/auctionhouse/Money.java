@@ -4,16 +4,36 @@
 package auctionhouse;
 
 /**
+ * Money is an object which encapsulates a double or String value that 
+ * represents a monetary value in pounds. It allows arithmetic and comparisons
+ * between different instances.
+ * 
  * @author pbj
  */
 public class Money implements Comparable<Money> {
- 
+    /**
+     * Holds the value of the instance of Money
+     */
     private double value;
     
+    /**
+     * Converts the input value from pounds to a value in pence, rounding
+     * 
+     * @param  pounds   the input value in pounds as a double
+     * @return the value of the method parameter multiplied by 100
+     */
     private static long getNearestPence(double pounds) {
         return Math.round(pounds * 100.0);
     }
- 
+    
+    /**
+     * Converts the input value from pounds as a double back to pounds as a double,
+     * rounding in the process so there are only 2 decimal places in the return value
+     * 
+     * @param  pounds    the input value in pounds as a double
+     * @return the value of pounds as a double, rounded to 2 decimal 
+     *         places by getNearestPence
+     */
     private static double normalise(double pounds) {
         return getNearestPence(pounds)/100.0;
         

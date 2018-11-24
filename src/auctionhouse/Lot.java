@@ -26,21 +26,6 @@ public class Lot extends CatalogueEntry {
         return Status.OK();
     }
     
-    public Status makeBid(Buyer currentBidder, Money bid) {
-        if (status != LotStatus.IN_AUCTION) {
-            return Status.error("Lot not on auction");
-        }
-        else if (bid.lessEqual(hammerPrice)) {
-            return Status.error("Bid less than hammer price");
-        }
-        else if (bid.compareTo(hammerPrice) > 0) {
-            hammerPrice = bid;
-            return Status.OK();
-        }
-        return Status.OK();
-        
-    }
-    
     public HashMap<String, Buyer> getInterestedBuyers(){
         return interestedBuyers;
     }
@@ -75,6 +60,18 @@ public class Lot extends CatalogueEntry {
 
     public void setLotAuctioneer(Auctioneer lotAuctioneer) {
         this.lotAuctioneer = lotAuctioneer;
+    }
+
+    public Buyer getLotBuyer() {
+        return lotBuyer;
+    }
+
+    public void setLotBuyer(Buyer lotBuyer) {
+        this.lotBuyer = lotBuyer;
+    }
+
+    public void setHammerPrice(Money bid) {
+        this.hammerPrice = bid;
     }
 
 }

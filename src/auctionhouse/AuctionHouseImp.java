@@ -130,11 +130,24 @@ public class AuctionHouseImp implements AuctionHouse {
             int lotNumber) {
         logger.fine(startBanner("openAuction " + auctioneerName + " " + lotNumber));
         
+        //gets information on the lot and creates an auctioneer for this lot.
         Lot currentLot = allLots.get(lotNumber);
         Auctioneer currentAuctioneer = new Auctioneer(auctioneerName, auctioneerAddress, parameters);
         currentLot.setLotAuctioneer(currentAuctioneer);
-        //need to change so status of lot is checked first
-        return currentAuctioneer.openAuction(currentLot);
+        
+        //calls openAuction from Auctioneer class to change lot status
+        Status auctionStatus = currentAuctioneer.openAuction(currentLot);
+        
+        //sends messages to lot seller and interested buyers if lot is available for auction
+        if (auctionStatus.kind == Status.Kind.OK) {
+            for (Buyer buyer : currentLot.getInterestedBuyers().values()) {
+                parameters.messagingService.auctionOpened(buyer.getAddress(), lotNumber);
+            }
+            Seller lotSeller = currentLot.getLotSeller();
+            parameters.messagingService.auctionOpened(lotSeller.getAddress(), lotNumber);
+        }
+        
+        return auctionStatus;
         
     }
 
@@ -144,10 +157,16 @@ public class AuctionHouseImp implements AuctionHouse {
             Money bid) {
         logger.fine(startBanner("makeBid " + buyerName + " " + lotNumber + " " + bid));
         
+        //getting information needed on buyer and lot
         Buyer currentBidder = registeredBuyers.get(buyerName);
         Lot currentLot = allLots.get(lotNumber);
         
-        Status bidStatus = currentLot.makeBid(currentBidder, bid);
+        //calls makeBid from Buyer class
+        Status bidStatus = currentBidder.makeBid(currentLot, bid, currentBidder);
+        
+        /* checks that bidStatus is valid before sending out messages to relevant actors that
+         * there is a new bid
+        */
         if (bidStatus.kind == Status.Kind.OK) {
             for (Buyer buyer : currentLot.getInterestedBuyers().values()) {
                 if(!(buyer.getName().equals(buyerName))) {
@@ -155,10 +174,10 @@ public class AuctionHouseImp implements AuctionHouse {
                             lotNumber, currentLot.getHammerPrice());
                 }
             }
-            String sellerAddress = currentLot.getLotSeller().getAddress();
-            String auctioneerAdd = currentLot.getLotAuctioneer().getAddress();
-            parameters.messagingService.bidAccepted(sellerAddress, lotNumber, bid);
-            parameters.messagingService.bidAccepted(auctioneerAdd, lotNumber, bid);
+            Seller lotSeller = currentLot.getLotSeller();
+            Auctioneer lotAuctioneer = currentLot.getLotAuctioneer();
+            parameters.messagingService.bidAccepted(lotSeller.getAddress(), lotNumber, bid);
+            parameters.messagingService.bidAccepted(lotAuctioneer.getAddress(), lotNumber, bid);
         }
         
         return Status.OK();    
@@ -168,7 +187,6 @@ public class AuctionHouseImp implements AuctionHouse {
             String auctioneerName,
             int lotNumber) {
         logger.fine(startBanner("closeAuction " + auctioneerName + " " + lotNumber));
-        //check if hammerprice is null to check if there were no (valid) bids made 
         return Status.OK();  
     }
     

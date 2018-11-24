@@ -35,5 +35,24 @@ public class Buyer {
     public String getBankAccount() {
         return bankAccount;
     }
+    
+    public Status makeBid(Lot currentLot, Money bid, Buyer currentBidder) {
+        
+        Money hammerPrice = currentLot.getHammerPrice();
+        
+            if (currentLot.getLotStatus() != LotStatus.IN_AUCTION) {
+                return Status.error("Lot not on auction");
+            }
+            else if (bid.lessEqual(hammerPrice)) {
+                return Status.error("Bid less than hammer price");
+            }
+            else if (bid.compareTo(hammerPrice) > 0) {
+                currentLot.setHammerPrice(bid);
+                currentLot.setLotBuyer(currentBidder);
+                return Status.OK();
+            }
+            
+            return Status.OK();
+    }
 
 }
