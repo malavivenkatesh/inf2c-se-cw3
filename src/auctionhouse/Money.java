@@ -55,8 +55,8 @@ public class Money implements Comparable<Money> {
     }
     /**
      * Adds the value of two instances of Money
-     * @param m one of the instances to be added
-     * @return
+     * @param m    one of the instances to be added
+     * @return     a new instance of Money which has the value of sum of the two parameters
      */
     public Money add(Money m) {
         return new Money(value + m.value);
