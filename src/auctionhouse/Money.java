@@ -17,7 +17,7 @@ public class Money implements Comparable<Money> {
     private double value;
     
     /**
-     * Converts the input value from pounds to a value in pence, rounding
+     * Converts the input value from pounds to a value in pence
      * 
      * @param  pounds   the input value in pounds as a double
      * @return the value of the method parameter multiplied by 100
@@ -30,7 +30,7 @@ public class Money implements Comparable<Money> {
      * Converts the input value from pounds as a double back to pounds as a double,
      * rounding in the process so there are only 2 decimal places in the return value
      * 
-     * @param  pounds    the input value in pounds as a double
+     * @param  pounds    the value to be rounded
      * @return the value of pounds as a double, rounded to 2 decimal 
      *         places by getNearestPence
      */
@@ -38,15 +38,26 @@ public class Money implements Comparable<Money> {
         return getNearestPence(pounds)/100.0;
         
     }
- 
+    /**
+     * Class constructor for a string parameter, converting to a double
+     * and keeping only 2 decimal places
+     * @param pounds the monetary value of the instance
+     */
     public Money(String pounds) {
         value = normalise(Double.parseDouble(pounds));
     }
-    
+    /**
+     * Class constructor for a double parameter
+     * @param pounds the monetary value of the instance
+     */
     private Money(double pounds) {
         value = pounds;
     }
-    
+    /**
+     * Adds the value of two instances of Money
+     * @param m one of the instances to be added
+     * @return
+     */
     public Money add(Money m) {
         return new Money(value + m.value);
     }
