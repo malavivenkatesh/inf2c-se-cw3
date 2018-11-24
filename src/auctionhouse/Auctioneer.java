@@ -10,6 +10,7 @@ public class Auctioneer {
 	public Auctioneer(String auctionID, String auctioneerAddress) {
 		this.auctioneerName = auctionID;
 		this.auctioneerAddress = auctioneerAddress;
+		this.parameters = parameters;
 	}
 	
 	public String getName() {
@@ -29,17 +30,16 @@ public class Auctioneer {
 	    
 	    currentLot.setLotStatus(LotStatus.IN_AUCTION);
 	    
-	    HashMap<String, Buyer> lotinterestedBuyers = currentLot.getInterestedBuyers();
+//	    HashMap<String, Buyer> lotinterestedBuyers = currentLot.getInterestedBuyers();
+//	    
+//	    for (String buyerName : lotinterestedBuyers.keySet()) {
+//	        Buyer currentBuyer = lotinterestedBuyers.get(buyerName);
+//	        String currentAddress = currentBuyer.getAddress();
+//	        
+////	        parameters.messagingService.auctionOpened(currentAddress, currentLot.getLotNumber());
+//	        
+//	    }
 	    
-	    for (String buyerName : lotinterestedBuyers.keySet()) {
-	        Buyer currentBuyer = lotinterestedBuyers.get(buyerName);
-	        String currentAddress = currentBuyer.getAddress();
-	        
-	        parameters.messagingService.auctionOpened(currentAddress, currentLot.lotNumber);
-	        
-	    }
-	    String sellerAddress = currentLot.getLotSeller().getAddress();
-	    parameters.messagingService.auctionOpened(sellerAddress, currentLot.lotNumber);
 	    
 	    return Status.OK();
 	}

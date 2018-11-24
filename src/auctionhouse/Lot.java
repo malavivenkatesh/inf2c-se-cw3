@@ -7,12 +7,14 @@ public class Lot extends CatalogueEntry {
     private Seller lotSeller;
     private Money reservePrice;
     private HashMap<String, Buyer> interestedBuyers = new HashMap<>();
+    private Parameters parameters;
     
     public Lot(Seller lotSeller, int number, String description, Money reservePrice) {
 
         super(number, description, LotStatus.UNSOLD);
         this.reservePrice = reservePrice;
         this.lotSeller = lotSeller;
+        this.parameters = parameters;
     }
     
     public Status noteInterest(String buyerName, Buyer intBuyer){
@@ -22,6 +24,10 @@ public class Lot extends CatalogueEntry {
     
     public HashMap<String, Buyer> getInterestedBuyers(){
         return interestedBuyers;
+    }
+    
+    public int getLotNumber() {
+        return lotNumber;
     }
     
     public LotStatus getLotStatus() {

@@ -22,6 +22,7 @@ public class AuctionHouseImp implements AuctionHouse {
     private HashMap<String, Buyer> registeredBuyers;
     private HashMap<String, Seller> registeredSellers;
     private HashMap<Integer, Lot> allLots;
+    private Parameters parameters;
     
     private String startBanner(String messageName) {
         return  LS 
@@ -34,7 +35,7 @@ public class AuctionHouseImp implements AuctionHouse {
         registeredBuyers = new HashMap<>();
         registeredSellers = new HashMap<>();
         allLots = new HashMap<>();
-        
+        this.parameters = parameters;
         
     }
 
@@ -132,8 +133,16 @@ public class AuctionHouseImp implements AuctionHouse {
         Lot currentLot = allLots.get(lotNumber);
         Auctioneer currentAuctioneer = new Auctioneer(auctioneerName, auctioneerAddress);
         
-        return Status.OK();
-                //currentAuctioneer.openAuction(currentLot);
+        for (String buyerName : currentLot.getInterestedBuyers().keySet()) {
+            Buyer currentBuyer = currentLot.getInterestedBuyers().get(buyerName);
+            String currentAddress = currentBuyer.getAddress();
+            
+            parameters.messagingService.auctionOpened(currentAddress, lotNumber);
+        }
+        String sellerAddress = currentLot.getLotSeller().getAddress();
+        parameters.messagingService.auctionOpened(sellerAddress, lotNumber);
+        
+        return currentAuctioneer.openAuction(currentLot);
         
     }
 
