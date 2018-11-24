@@ -8,18 +8,37 @@ public class Lot extends CatalogueEntry {
     private Money reservePrice;
     private HashMap<String, Buyer> interestedBuyers = new HashMap<>();
     private Parameters parameters;
+    private Money hammerPrice;
+    private Buyer lotBuyer;
+    private Auctioneer lotAuctioneer;
     
-    public Lot(Seller lotSeller, int number, String description, Money reservePrice) {
+    public Lot(Seller lotSeller, int number, String description, Money reservePrice, Parameters parameters) {
 
         super(number, description, LotStatus.UNSOLD);
         this.reservePrice = reservePrice;
         this.lotSeller = lotSeller;
         this.parameters = parameters;
+        this.hammerPrice = new Money("0");
     }
     
     public Status noteInterest(String buyerName, Buyer intBuyer){
         interestedBuyers.put(buyerName, intBuyer);
         return Status.OK();
+    }
+    
+    public Status makeBid(Buyer currentBidder, Money bid) {
+        if (status != LotStatus.IN_AUCTION) {
+            return Status.error("Lot not on auction");
+        }
+        else if (bid.lessEqual(hammerPrice)) {
+            return Status.error("Bid less than hammer price");
+        }
+        else if (bid.compareTo(hammerPrice) > 0) {
+            hammerPrice = bid;
+            return Status.OK();
+        }
+        return Status.OK();
+        
     }
     
     public HashMap<String, Buyer> getInterestedBuyers(){
@@ -28,6 +47,10 @@ public class Lot extends CatalogueEntry {
     
     public int getLotNumber() {
         return lotNumber;
+    }
+    
+    public Money getHammerPrice() {
+        return hammerPrice;
     }
     
     public LotStatus getLotStatus() {
@@ -44,6 +67,14 @@ public class Lot extends CatalogueEntry {
 
     public Seller getLotSeller() {
         return lotSeller;
+    }
+
+    public Auctioneer getLotAuctioneer() {
+        return lotAuctioneer;
+    }
+
+    public void setLotAuctioneer(Auctioneer lotAuctioneer) {
+        this.lotAuctioneer = lotAuctioneer;
     }
 
 }
