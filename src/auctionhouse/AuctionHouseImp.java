@@ -183,11 +183,66 @@ public class AuctionHouseImp implements AuctionHouse {
         return Status.OK();    
     }
 
-    public Status closeAuction(
+   public Status closeAuction(
             String auctioneerName,
             int lotNumber) {
         logger.fine(startBanner("closeAuction " + auctioneerName + " " + lotNumber));
+        //check if hammerprice is null to check if there were no (valid) bids made 
+        Lot currentLot = allLots.get(lotNumber);
+        Money hammerPrice = currentLot.getHammerPrice();
+        Money reservePrice = currentLot.getReservePrice();
+        Buyer buyer = allLots.get(lotNumber).getLotBuyer();
+        if (currentLot.getLotStatus() != LotStatus.IN_AUCTION) {
+        	return Status.error("Lot not in Auction.");
+        }
+        
+        if (hammerPrice.lessEqual(reservePrice)) {
+        	currentLot.setLotStatus(LotStatus.UNSOLD);
+        	for (Buyer buyer : currentLot.getInterestedBuyers().values()) {
+        		parameters.messagingService.lotUnsold(buyer.getAddress(), lotNumber);
+        	}
+        	parameters.messagingService.lotUnsold(currentLot.getLotSeller().getAddress(), lotNumber);
+        } else {
+        	currentLot.setLotStatus(LotStatus.SOLD_PENDING_PAYMENT);
+        	for (Buyer buyer : currentLot.getInterestedBuyers().values()) {
+        		parameters.messagingService.lotSold(buyer.getAddress(), lotNumber);
+        	}
+        	parameters.messagingService.lotSold(currentLot.getLotSeller().getAddress(), lotNumber);
+        	
+
+        	if ((getBuyerPayment(buyer, hammerPrice, parameters) != Status.Kind.OK) {
+        		
+        	}
+        	
+        
+        
+        
+        }
         return Status.OK();  
+    }
+    
+    public Status getBuyerPayment(Buyer buyer, Money hammerPrice, Parameters parameters) {
+    	String sellerAccount  = buyer.getBankAccount();
+    	String sellerAuthCode = buyer.getBankAuthCode();
+    	String houseAccount = parameters.houseBankAccount;
+    	hammerPrice.addPercent(parameters.buyerPremium);
+    	auctionhouse.Status transferStatus = parameters.bankingService.transfer(sellerAccount, sellerAuthCode, houseAccount, hammerPrice);
+    	return transferStatu;
+    	
+    }
+    
+    public Status paySeller(Seller seller, Money amount, Parameters parameters) {
+    	String sellerAccount  = seller.getBankAccount();
+    	String houseAccount = parameters.houseBankAccount;
+    	String houseAuthCode = parameters.houseBankAuthCode;
+    	Double commission = parameters.commission;
+    	amount.addPercent(-commission);
+    
+    	amount.addPercent(parameters.buyerPremium);
+    	Status transferStatus = parameters.bankingService.transfer(houseAccount, houseAuthCode, sellerAccount, amount);
+    	 
+    	return transferStatus;
+    	
     }
     
 }
