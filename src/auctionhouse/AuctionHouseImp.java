@@ -34,6 +34,8 @@ public class AuctionHouseImp implements AuctionHouse {
         registeredBuyers = new HashMap<>();
         registeredSellers = new HashMap<>();
         allLots = new HashMap<>();
+        
+        
     }
 
     public Status registerBuyer(
@@ -43,9 +45,6 @@ public class AuctionHouseImp implements AuctionHouse {
             String bankAuthCode) {
         logger.fine(startBanner("registerBuyer " + name));
         
-//        if (name.equals(null) || address.equals(null) || bankAccount.equals(null)) {
-//            return Status.error("Input empty");
-//        }
         if (registeredBuyers.get(name) != null) {
             return Status.error("Buyer already registered");
         }
@@ -130,7 +129,12 @@ public class AuctionHouseImp implements AuctionHouse {
             int lotNumber) {
         logger.fine(startBanner("openAuction " + auctioneerName + " " + lotNumber));
         
+        Lot currentLot = allLots.get(lotNumber);
+        Auctioneer currentAuctioneer = new Auctioneer(auctioneerName, auctioneerAddress);
+        
         return Status.OK();
+                //currentAuctioneer.openAuction(currentLot);
+        
     }
 
     public Status makeBid(

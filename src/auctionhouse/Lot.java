@@ -19,4 +19,25 @@ public class Lot extends CatalogueEntry {
         interestedBuyers.put(buyerName, intBuyer);
         return Status.OK();
     }
+    
+    public HashMap<String, Buyer> getInterestedBuyers(){
+        return interestedBuyers;
+    }
+    
+    public LotStatus getLotStatus() {
+        return status;
+    }
+    
+    public void setLotStatus(LotStatus status) {
+        this.status = status;
+    }
+
+    public Money getReservePrice() {
+        return reservePrice;
+    }
+
+    public Seller getLotSeller() {
+        return lotSeller;
+    }
+
 }
