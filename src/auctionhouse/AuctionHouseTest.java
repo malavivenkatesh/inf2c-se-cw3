@@ -281,7 +281,7 @@ public class AuctionHouseTest {
     }
 
     @Test
-    public void testRegisterSellerDuplicateNames() {
+    public void testRegisterSellerDuplicateNames() { 
         logger.info(makeBanner("testRegisterSellerDuplicateNames"));
         runStory(1);     
         assertError(house.registerSeller("SellerY", "@SellerZ", "SZ A/C"));       
