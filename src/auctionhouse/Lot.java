@@ -23,13 +23,6 @@ public class Lot extends CatalogueEntry {
         this.hammerPrice = new Money("0");
     }
     
-    public Status noteInterest(String buyerName, Buyer intBuyer){
-        logger.fine("Entering");
-        
-        interestedBuyers.put(buyerName, intBuyer);
-        return Status.OK();
-    }
-    
     public HashMap<String, Buyer> getInterestedBuyers(){
         return interestedBuyers;
     }

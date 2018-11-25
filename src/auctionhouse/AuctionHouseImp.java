@@ -181,7 +181,7 @@ public class AuctionHouseImp implements AuctionHouse {
             parameters.messagingService.bidAccepted(lotSeller.getAddress(), lotNumber, bid);
             parameters.messagingService.bidAccepted(lotAuctioneer.getAddress(), lotNumber, bid);
         }
-        return Status.OK();    
+        return bidStatus;    
     }
 
    public Status closeAuction(
@@ -196,6 +196,10 @@ public class AuctionHouseImp implements AuctionHouse {
         Buyer buyer = allLots.get(lotNumber).getLotBuyer();
         Seller seller = allLots.get(lotNumber).getLotSeller();
         Auctioneer auctioneer = currentLot.getLotAuctioneer();
+        
+        if (!(auctioneer.getName().equals(auctioneerName))) {
+            return Status.error("This auctioneer did not open this lot for auction");
+        }
         
         //calling auctioneer class to close the auction
         Status soldStatus = auctioneer.closeAuction(currentLot, buyer, seller,

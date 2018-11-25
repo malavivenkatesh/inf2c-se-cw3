@@ -58,13 +58,11 @@ public class Buyer {
             else if (bid.lessEqual(hammerPrice)) {
                 return Status.error("Bid less than hammer price");
             }
-            else if (bid.compareTo(hammerPrice) > 0) {
+            else {
                 currentLot.setHammerPrice(bid);
                 currentLot.setLotBuyer(currentBidder);
                 return Status.OK();
             }
-            
-            return Status.OK();
     }
 
 }
