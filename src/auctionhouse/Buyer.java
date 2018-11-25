@@ -1,6 +1,9 @@
 package auctionhouse;
 
+import java.util.logging.Logger;
+
 public class Buyer {
+    private static Logger logger = Logger.getLogger("auctionhouse");
     
     private String name;
     private String address;
@@ -36,7 +39,16 @@ public class Buyer {
         return bankAccount;
     }
     
+    public Status noteInterest(Lot interestedLot, String buyerName
+            , Buyer interestedBuyer) {
+        logger.fine("Entering");
+        
+        interestedLot.getInterestedBuyers().put(buyerName, interestedBuyer);
+        return Status.OK();
+    }
+    
     public Status makeBid(Lot currentLot, Money bid, Buyer currentBidder) {
+        logger.fine("Entering");
         
         Money hammerPrice = currentLot.getHammerPrice();
         

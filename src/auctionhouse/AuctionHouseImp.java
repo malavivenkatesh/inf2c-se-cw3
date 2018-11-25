@@ -112,14 +112,15 @@ public class AuctionHouseImp implements AuctionHouse {
             int lotNumber) {
         logger.fine(startBanner("noteInterest " + buyerName + " " + lotNumber));
         
-        Buyer intBuyer = registeredBuyers.get(buyerName);
+        Buyer interestedBuyer = registeredBuyers.get(buyerName);
         
-        if (intBuyer == null) {
+        //checks if buyer is registered
+        if (interestedBuyer == null) {
             return Status.error("User not registered as buyer");
         }
         
-        Lot intLot = allLots.get(lotNumber);
-        intLot.noteInterest(buyerName, intBuyer);
+        Lot interestedLot = allLots.get(lotNumber);
+        interestedBuyer.noteInterest(interestedLot, buyerName, interestedBuyer);
         
         return Status.OK();   
     }
