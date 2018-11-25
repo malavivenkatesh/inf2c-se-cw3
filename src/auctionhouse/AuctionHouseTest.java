@@ -44,6 +44,13 @@ public class AuctionHouseTest {
         assertEquals(Status.Kind.SALE, status.kind);
     }
     
+    private static void assertPendingPayment(Status status) { 
+        assertEquals(Status.Kind.SALE_PENDING_PAYMENT, status.kind);
+    }
+    
+    private static void assertNoSale(Status status) { 
+        assertEquals(Status.Kind.NO_SALE, status.kind);
+    }
     /*
      * Logging functionality
      */
@@ -154,6 +161,106 @@ public class AuctionHouseTest {
         bankingService.expectTransfer("AH A/C",  "AH-auth",  "SY A/C", new Money("85.00"));
         bankingService.verify();
         if (endPoint == 8) return;
+        //testing our implementation
+        //testing having duplicated buyers
+        assertError(house.registerBuyer("BuyerA", "@BuyerA", "BA A/C", "BA-auth"));
+        if (endPoint == 9) return;
+        
+        //test having duplicate lots
+        assertError(house.addLot("SellerY", 2, "Painting", new Money("200.00")));
+        if (endPoint == 10) return;
+       
+        //adding new lots and buyers noting interest in those lots. this has already been tested
+        assertOK(house.registerBuyer("BuyerD", "@BuyerD", "BAD", "BA-auth"));
+        assertOK(house.addLot("SellerY", 3, "Painting", new Money("150.00")));
+        assertOK(house.addLot("SellerY", 6, "Painting", new Money("150.00")));
+        assertOK(house.addLot("SellerY", 7, "Painting", new Money("150.00")));
+        assertOK(house.addLot("SellerY", 8, "Painting", new Money("50.00")));
+        assertOK(house.noteInterest("BuyerA", 3));
+        assertOK(house.noteInterest("BuyerB", 3));
+        assertOK(house.noteInterest("BuyerA", 6));
+        assertOK(house.noteInterest("BuyerB", 6));
+        assertOK(house.noteInterest("BuyerA", 7));
+        assertOK(house.noteInterest("BuyerD", 7));
+        assertOK(house.noteInterest("BuyerA", 8));
+        assertOK(house.noteInterest("BuyerB", 8));
+        if (endPoint == 11) return;
+        
+        //testing bid is lower than previous
+        assertOK(house.openAuction("Auctioneer7", "@Auctioneer7", 3));
+
+        messagingService.expectAuctionOpened("@BuyerA", 3);
+        messagingService.expectAuctionOpened("@BuyerB", 3);
+        messagingService.expectAuctionOpened("@SellerY", 3);
+        messagingService.verify();
+        
+        
+        Money m90 = new Money("90.00");
+        assertOK(house.makeBid("BuyerA", 3, m90));
+        messagingService.expectBidReceived("@BuyerB", 3, m90);
+        messagingService.expectBidReceived("@Auctioneer7", 3, m90);
+        messagingService.expectBidReceived("@SellerY", 3, m90);
+        messagingService.verify();
+        
+        Money m80 = new Money("80.00");        
+        assertError(house.makeBid("BuyerB", 3, m80));
+        if (endPoint == 12) return;
+        
+        //checking case when hammerPrice is lower than reservePrice
+        assertOK(house.openAuction("Auctioneer2", "@Auctioneer2", 6));
+
+        messagingService.expectAuctionOpened("@BuyerA", 6);
+        messagingService.expectAuctionOpened("@BuyerB", 6);
+        messagingService.expectAuctionOpened("@SellerY", 6);
+        messagingService.verify();
+        
+        assertOK(house.makeBid("BuyerA", 6, m80));
+        messagingService.expectBidReceived("@BuyerB", 6, m80);
+        messagingService.expectBidReceived("@Auctioneer2", 6, m80);
+        messagingService.expectBidReceived("@SellerY", 6, m80);
+        messagingService.verify();
+        
+        assertNoSale(house.closeAuction("Auctioneer2",  6));
+        messagingService.expectLotUnsold("@BuyerA", 6);
+        messagingService.expectLotUnsold("@BuyerB", 6);
+        messagingService.expectLotUnsold("@SellerY", 6);
+        messagingService.verify();       
+        
+        if (endPoint == 13) return;
+        
+        //checking case where buyer payment doesn't go through
+        assertOK(house.openAuction("Auctioneer2", "@Auctioneer2", 7));
+
+        messagingService.expectAuctionOpened("@BuyerA", 7);
+        messagingService.expectAuctionOpened("@BuyerD", 7);
+        messagingService.expectAuctionOpened("@SellerY", 7);
+        messagingService.verify();
+        
+        Money m200 = new Money("200.00");
+        assertOK(house.makeBid("BuyerD", 7, m200));
+        messagingService.expectBidReceived("@BuyerA", 7, m200);
+        messagingService.expectBidReceived("@Auctioneer2", 7, m200);
+        messagingService.expectBidReceived("@SellerY", 7, m200);
+        messagingService.verify();
+        
+        bankingService.setBadAccount("BAD");
+        assertPendingPayment(house.closeAuction("Auctioneer2",  7));
+        if (endPoint == 14) return;
+        
+        assertOK(house.openAuction("Auctioneer2", "@Auctioneer2", 8));
+
+        messagingService.expectAuctionOpened("@BuyerA", 8);
+        messagingService.expectAuctionOpened("@BuyerB", 8);
+        messagingService.expectAuctionOpened("@SellerY", 8);
+        messagingService.verify();
+        
+        assertOK(house.makeBid("BuyerA", 8, m80));
+        messagingService.expectBidReceived("@BuyerB", 8, m80);
+        messagingService.expectBidReceived("@Auctioneer2", 8, m80);
+        messagingService.expectBidReceived("@SellerY", 8, m80);
+        messagingService.verify();
+        
+        assertError(house.closeAuction("Auctioneer1",  8));
     }
     
     @Test
@@ -230,6 +337,48 @@ public class AuctionHouseTest {
         logger.info(makeBanner("testCloseAuctionWithSale"));
         runStory(8);
     }
-     
     
+    @Test
+    public void testDuplicateBuyer() {
+    	logger.info(makeBanner("testDuplicateBuyer"));
+    	runStory(9);
+    }
+    
+    @Test
+    public void testDuplicateLotNumber() {
+    	logger.info(makeBanner("testDuplicateLotNumber"));
+    	runStory(10);
+    }
+    
+    @Test
+    public void testNoteInterestOnNewLot() {
+    	logger.info(makeBanner("testNoteInterestOnNewLot"));
+    	runStory(11);
+    }
+    
+    @Test
+    public void testBidTooLow() {
+    	logger.info(makeBanner("testBidTooLow"));
+    	runStory(12);
+    }
+    
+    @Test
+    public void testHammerPriceTooLow() {
+    	logger.info(makeBanner("testHammerPriceTooLow"));
+    	runStory(13);
+    }
+    
+    @Test
+    public void testBadAccount() {
+    	logger.info(makeBanner("testBadAccount"));
+    	runStory(14);
+    }
+    
+    @Test
+    public void testWrongAuctionnerCloses() {
+    	logger.info(makeBanner("testBadAccount"));
+    	runStory(15);
+    }
+     
+    //auctioneer closing auction 
 }
