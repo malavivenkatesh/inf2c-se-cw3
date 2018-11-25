@@ -161,7 +161,9 @@ public class AuctionHouseTest {
         bankingService.expectTransfer("AH A/C",  "AH-auth",  "SY A/C", new Money("85.00"));
         bankingService.verify();
         if (endPoint == 8) return;
+        
         //testing our implementation
+        
         //testing having duplicated buyers
         assertError(house.registerBuyer("BuyerA", "@BuyerA", "BA A/C", "BA-auth"));
         if (endPoint == 9) return;
@@ -176,6 +178,7 @@ public class AuctionHouseTest {
         assertOK(house.addLot("SellerY", 6, "Painting", new Money("150.00")));
         assertOK(house.addLot("SellerY", 7, "Painting", new Money("150.00")));
         assertOK(house.addLot("SellerY", 8, "Painting", new Money("50.00")));
+        assertOK(house.addLot("SellerY", 9, "Duck", new Money("20.00")));
         assertOK(house.noteInterest("BuyerA", 3));
         assertOK(house.noteInterest("BuyerB", 3));
         assertOK(house.noteInterest("BuyerA", 6));
@@ -184,6 +187,8 @@ public class AuctionHouseTest {
         assertOK(house.noteInterest("BuyerD", 7));
         assertOK(house.noteInterest("BuyerA", 8));
         assertOK(house.noteInterest("BuyerB", 8));
+        assertOK(house.noteInterest("BuyerA", 9));
+        assertOK(house.noteInterest("BuyerB", 9));
         if (endPoint == 11) return;
         
         //testing bid is lower than previous
@@ -228,6 +233,35 @@ public class AuctionHouseTest {
         
         if (endPoint == 13) return;
         
+      //checking case where bid < increment + old bid
+        assertOK(house.openAuction("Auctioneer2", "@Auctioneer2", 9));
+
+        messagingService.expectAuctionOpened("@BuyerA", 9);
+        messagingService.expectAuctionOpened("@BuyerB", 9);
+        messagingService.expectAuctionOpened("@SellerY", 9);
+        messagingService.verify();
+        
+        Money m30 = new Money("30.00");
+        Money m35 = new Money("35.00");
+        assertOK(house.makeBid("BuyerA", 9, m30));
+        messagingService.expectBidReceived("@BuyerB", 9, m30);
+        messagingService.expectBidReceived("@Auctioneer2", 9, m30);
+        messagingService.expectBidReceived("@SellerY", 9, m30);
+        messagingService.verify();
+        
+        assertError(house.makeBid("BuyerA", 9, m35));
+        
+        assertSale(house.closeAuction("Auctioneer2",  9));
+        messagingService.expectLotSold("@BuyerB", 9);
+        messagingService.expectLotSold("@BuyerA", 9);
+        messagingService.expectLotSold("@SellerY", 9);
+        messagingService.verify();
+        
+        bankingService.expectTransfer("BA A/C",  "BA-auth",  "AH A/C", new Money("33.00"));
+        bankingService.expectTransfer("AH A/C",  "AH-auth",  "SY A/C", new Money("25.50"));
+        bankingService.verify();
+        if(endPoint == 14) return;
+        
         //checking case where buyer payment doesn't go through
         assertOK(house.openAuction("Auctioneer2", "@Auctioneer2", 7));
 
@@ -245,7 +279,7 @@ public class AuctionHouseTest {
         
         bankingService.setBadAccount("BAD");
         assertPendingPayment(house.closeAuction("Auctioneer2",  7));
-        if (endPoint == 14) return;
+        if (endPoint == 15) return;
         
         assertOK(house.openAuction("Auctioneer2", "@Auctioneer2", 8));
 
@@ -261,6 +295,9 @@ public class AuctionHouseTest {
         messagingService.verify();
         
         assertError(house.closeAuction("Auctioneer1",  8));
+        if (endPoint == 16) return;
+        
+        
     }
     
     @Test
@@ -371,13 +408,19 @@ public class AuctionHouseTest {
     @Test
     public void testBadAccount() {
     	logger.info(makeBanner("testBadAccount"));
-    	runStory(14);
+    	runStory(15);
     }
     
     @Test
     public void testWrongAuctioneerCloses() {
     	logger.info(makeBanner("testBadAccount"));
-    	runStory(15);
+    	runStory(16);
+    }
+    
+    @Test
+    public void testBidLowerThanIncrement() {
+        logger.info(makeBanner("testBidLowerThanIncrement"));
+        runStory(14);
     }
      
 }

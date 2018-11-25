@@ -50,7 +50,7 @@ public class AuctionHouseImp implements AuctionHouse {
             return Status.error("Buyer already registered");
         }
         
-        Buyer newBuyer = new Buyer(name, address, bankAccount, bankAuthCode);
+        Buyer newBuyer = new Buyer(name, address, bankAccount, bankAuthCode, parameters);
         registeredBuyers.put(name, newBuyer);
         
         return Status.OK();
@@ -173,7 +173,7 @@ public class AuctionHouseImp implements AuctionHouse {
             for (Buyer buyer : currentLot.getInterestedBuyers().values()) {
                 if(!(buyer.getName().equals(buyerName))) {
                     parameters.messagingService.bidAccepted(buyer.getAddress(), 
-                            lotNumber, currentLot.getHammerPrice());
+                            lotNumber, bid);
                 }
             }
             Seller lotSeller = currentLot.getLotSeller();
@@ -193,8 +193,8 @@ public class AuctionHouseImp implements AuctionHouse {
         Lot currentLot = allLots.get(lotNumber);
         Money hammerPrice = currentLot.getHammerPrice();
         Money reservePrice = currentLot.getReservePrice();
-        Buyer buyer = allLots.get(lotNumber).getLotBuyer();
-        Seller seller = allLots.get(lotNumber).getLotSeller();
+        Buyer buyer = currentLot.getLotBuyer();
+        Seller seller = currentLot.getLotSeller();
         Auctioneer auctioneer = currentLot.getLotAuctioneer();
         
         if (!(auctioneer.getName().equals(auctioneerName))) {

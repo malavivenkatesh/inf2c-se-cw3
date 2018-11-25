@@ -42,10 +42,12 @@ public class Auctioneer {
 	    
 	    //if the lot is not in auction then return an error
         if (currentLot.getLotStatus() != LotStatus.IN_AUCTION) {
+            logger.finer("lot not in auction");
             return Status.error("Lot not in Auction.");
         }
         //checks for the hammer price is greater than the reserve price
         else if (hammerPrice.lessEqual(reservePrice) && !(hammerPrice.equals(reservePrice))) {
+            logger.finer("hammer price" + hammerPrice.toString() + "< = reserve price " + reservePrice.toString());
             currentLot.setLotStatus(LotStatus.UNSOLD);
             Status saleStatus = new Status(Status.Kind.NO_SALE);
             for (Buyer interestedBuyer : currentLot.getInterestedBuyers().values()) {
@@ -54,7 +56,7 @@ public class Auctioneer {
             parameters.messagingService.lotUnsold(currentLot.getLotSeller().getAddress(), lotNumber);
             return saleStatus;
         } 
-        else {          
+        else {  
             hammerPrice.addPercent(parameters.buyerPremium);
             Status buyerTransferStatus = getBuyerPayment(buyer, hammerPrice, parameters);
             
