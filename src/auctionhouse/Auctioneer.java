@@ -1,8 +1,11 @@
 package auctionhouse;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class Auctioneer {
+    private static Logger logger = Logger.getLogger("auctionhouse");
+    
 	private String auctioneerName;
 	private String auctioneerAddress;
 	private Parameters parameters;
@@ -23,7 +26,7 @@ public class Auctioneer {
 	}
 	
 	public Status openAuction(Lot currentLot) {
-	    
+	    logger.fine("Entering");
 	    if(currentLot.getLotStatus() != LotStatus.UNSOLD) {
 	        return Status.error("Lot not available for auction");
 	    }
@@ -34,6 +37,7 @@ public class Auctioneer {
 	
 	public Status closeAuction(Lot currentLot, Buyer buyer, Seller seller,
 	        Money reservePrice, Money hammerPrice) {
+	    logger.fine("Entering");
 	    int lotNumber = currentLot.getLotNumber();
 	    
 	    //if the lot is not in auction then return an error
@@ -83,6 +87,8 @@ public class Auctioneer {
 	
 	
     public Status getBuyerPayment(Buyer buyer, Money hammerPrice, Parameters parameters) {
+        logger.fine("Entering");
+        
         String sellerAccount  = buyer.getBankAccount();
         String sellerAuthCode = buyer.getBankAuthCode();
         String houseAccount = parameters.houseBankAccount;
@@ -94,6 +100,8 @@ public class Auctioneer {
     }
     
     public Status paySeller(Seller seller, Money hammerPrice, Parameters parameters) {
+        logger.fine("Entering");
+        
         String sellerAccount  = seller.getBankAccount();
         String houseAccount = parameters.houseBankAccount;
         String houseAuthCode = parameters.houseBankAuthCode;

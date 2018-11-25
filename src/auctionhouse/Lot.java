@@ -1,8 +1,10 @@
 package auctionhouse;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class Lot extends CatalogueEntry {
+    private static Logger logger = Logger.getLogger("auctionhouse");
     
     private Seller lotSeller;
     private Money reservePrice;
@@ -22,6 +24,8 @@ public class Lot extends CatalogueEntry {
     }
     
     public Status noteInterest(String buyerName, Buyer intBuyer){
+        logger.fine("Entering");
+        
         interestedBuyers.put(buyerName, intBuyer);
         return Status.OK();
     }

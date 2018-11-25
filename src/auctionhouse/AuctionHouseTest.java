@@ -153,7 +153,7 @@ public class AuctionHouseTest {
         bankingService.expectTransfer("BB A/C",  "BB-auth",  "AH A/C", new Money("110.00"));
         bankingService.expectTransfer("AH A/C",  "AH-auth",  "SY A/C", new Money("85.00"));
         bankingService.verify();
-        
+        if (endPoint == 8) return;
     }
     
     @Test
