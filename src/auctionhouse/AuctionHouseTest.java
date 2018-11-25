@@ -375,10 +375,9 @@ public class AuctionHouseTest {
     }
     
     @Test
-    public void testWrongAuctionnerCloses() {
+    public void testWrongAuctioneerCloses() {
     	logger.info(makeBanner("testBadAccount"));
     	runStory(15);
     }
      
-    //auctioneer closing auction 
 }

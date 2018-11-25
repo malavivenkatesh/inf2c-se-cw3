@@ -52,7 +52,7 @@ public class Auctioneer {
                 parameters.messagingService.lotUnsold(interestedBuyer.getAddress(), currentLot.lotNumber);
             }
             parameters.messagingService.lotUnsold(currentLot.getLotSeller().getAddress(), lotNumber);
-            
+            return saleStatus;
         } 
         else {          
             hammerPrice.addPercent(parameters.buyerPremium);
@@ -60,17 +60,17 @@ public class Auctioneer {
             
             if (buyerTransferStatus.kind != Status.Kind.OK) {
                 currentLot.setLotStatus(LotStatus.SOLD_PENDING_PAYMENT);
-                Status saleStatus = new Status(Status.Kind.NO_SALE);
-                return Status.error("Buyer's transfer failed");
+                Status saleStatus = new Status(Status.Kind.SALE_PENDING_PAYMENT);
+                return saleStatus;
             }
             
  
             Status sellerTransferStatus = paySeller(seller, hammerPrice, parameters);
             
             if (sellerTransferStatus.kind != Status.Kind.OK) {
-                Status saleStatus = new Status(Status.Kind.NO_SALE);
+                Status saleStatus = new Status(Status.Kind.SALE_PENDING_PAYMENT);
                 currentLot.setLotStatus(LotStatus.SOLD_PENDING_PAYMENT);
-                return Status.error("Transfer to seller failed");
+                return saleStatus;
             }       
             
             currentLot.setLotStatus(LotStatus.SOLD);
@@ -78,8 +78,8 @@ public class Auctioneer {
                 parameters.messagingService.lotSold(interestedBuyer.getAddress(), lotNumber);
             }
             parameters.messagingService.lotSold(currentLot.getLotSeller().getAddress(), lotNumber);
+            
         }
-        
         Status saleStatus = new Status(Status.Kind.SALE);
         return saleStatus;
 }
