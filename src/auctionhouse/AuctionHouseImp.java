@@ -188,76 +188,21 @@ public class AuctionHouseImp implements AuctionHouse {
             int lotNumber) {
         logger.fine(startBanner("closeAuction " + auctioneerName + " " + lotNumber));
         
+        //getting all the information needed
         Lot currentLot = allLots.get(lotNumber);
         Money hammerPrice = currentLot.getHammerPrice();
         Money reservePrice = currentLot.getReservePrice();
         Buyer buyer = allLots.get(lotNumber).getLotBuyer();
         Seller seller = allLots.get(lotNumber).getLotSeller();
-        if (currentLot.getLotStatus() != LotStatus.IN_AUCTION) {
-        	return Status.error("Lot not in Auction.");
-        }
+        Auctioneer auctioneer = currentLot.getLotAuctioneer();
         
-        if (hammerPrice.lessEqual(reservePrice)) {
-        	currentLot.setLotStatus(LotStatus.UNSOLD);
-        	Status saleStatus = new Status(Status.Kind.NO_SALE);
-        	for (Buyer interestedBuyer : currentLot.getInterestedBuyers().values()) {
-        		parameters.messagingService.lotUnsold(interestedBuyer.getAddress(), lotNumber);
-        	}
-        	parameters.messagingService.lotUnsold(currentLot.getLotSeller().getAddress(), lotNumber);
-        	
-        } else {        	
-        	hammerPrice.addPercent(parameters.buyerPremium);
-        	Status buyerTransferStatus = (getBuyerPayment(buyer, hammerPrice, parameters));
-        	
-        	if (buyerTransferStatus.kind != Status.Kind.OK) {
-        	    currentLot.setLotStatus(LotStatus.SOLD_PENDING_PAYMENT);
-        	    Status saleStatus = new Status(Status.Kind.NO_SALE);
-        		return Status.error("Buyer's transfer failed");
-        	}
-        	
- 
-        	Status sellerTransferStatus = paySeller(seller, hammerPrice, parameters);
-        	
-        	if (sellerTransferStatus.kind != Status.Kind.OK) {
-        	    Status saleStatus = new Status(Status.Kind.NO_SALE);
-        	    currentLot.setLotStatus(LotStatus.SOLD_PENDING_PAYMENT);
-                return Status.error("Transfer to seller failed");
-            }       
-        	
-        	currentLot.setLotStatus(LotStatus.SOLD);
-        	for (Buyer interestedBuyer : currentLot.getInterestedBuyers().values()) {
-                parameters.messagingService.lotSold(interestedBuyer.getAddress(), lotNumber);
-            }
-            parameters.messagingService.lotSold(currentLot.getLotSeller().getAddress(), lotNumber);
-        }
+        //calling auctioneer class to close the auction
+        Status soldStatus = auctioneer.closeAuction(currentLot, buyer, seller,
+                reservePrice, hammerPrice);
+        return soldStatus;
         
-        Status saleStatus = new Status(Status.Kind.SALE);
-        return saleStatus;
     }
     
-    public Status getBuyerPayment(Buyer buyer, Money hammerPrice, Parameters parameters) {
-    	String sellerAccount  = buyer.getBankAccount();
-    	String sellerAuthCode = buyer.getBankAuthCode();
-    	String houseAccount = parameters.houseBankAccount;
-    	Money buyerPrice = hammerPrice.addPercent(parameters.buyerPremium);
-    	auctionhouse.Status transferStatus = 
-    	        parameters.bankingService.transfer(sellerAccount, sellerAuthCode, houseAccount, buyerPrice);
-    	return transferStatus;
-    	
-    }
-    
-    public Status paySeller(Seller seller, Money hammerPrice, Parameters parameters) {
-    	String sellerAccount  = seller.getBankAccount();
-    	String houseAccount = parameters.houseBankAccount;
-    	String houseAuthCode = parameters.houseBankAuthCode;
-    	Double commission = parameters.commission;
-    	Money sellerPayment = hammerPrice.addPercent(-commission);
-    
-    	Status transferStatus = 
-    	        parameters.bankingService.transfer(houseAccount, houseAuthCode, sellerAccount, sellerPayment);
- 
-    	return transferStatus;
-    	
-    }
+
     
 }

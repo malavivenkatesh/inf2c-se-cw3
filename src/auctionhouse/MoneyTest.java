@@ -4,6 +4,8 @@
 package auctionhouse;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 /**
@@ -42,8 +44,57 @@ public class MoneyTest {
     	 assertEquals("11.00", result.toString());
      }
      
+     Money val1 = new Money("5.00");
+     Money val2 = new Money("6.00");
+     Money val3 = new Money("5.00");
+     
      @Test
-     public void testCompareTo
+     public void testCompareToLessThan() {
+         int result = val1.compareTo(val2);
+         assertTrue(result < 0);
+     }
+     
+     @Test
+     public void testCompareToEqual() {
+         int result = val1.compareTo(val3);
+         assertTrue(result == 0);
+     }
+     
+     @Test
+     public void testCompareToGreaterThan() {
+         int result = val2.compareTo(val1);
+         assertTrue(result > 0);
+     }
+     
+     @Test
+     public void testLessEqualLessThan() {
+         Boolean result = val1.lessEqual(val2);
+         assertEquals("true", result.toString());
+     }
+     
+     @Test
+     public void testLessEqualEqual() {
+         Boolean result = val1.lessEqual(val3);
+         assertEquals("true", result.toString());
+     }
+     
+     @Test
+     public void testLessEqualGreaterThan() {
+         Boolean result = val2.lessEqual(val1);
+         assertEquals("false", result.toString());
+     }
+     
+     @Test
+     public void testEqualsNotEqual() {
+         Boolean result = val1.equals(val2);
+         assertEquals("false", result.toString());
+     }
+     
+     @Test
+     public void testEqualsEqual() {
+         Boolean result = val1.equals(val3);
+         assertEquals("true", result.toString()); 
+     }
 
     /*
      * Put all class modifications above.
